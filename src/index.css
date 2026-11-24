@@ -1,0 +1,157 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, .font-editorial {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  .dark body {
+    letter-spacing: 0.01em;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch drag prevention strictly inside the puzzle grid */
+.puzzle-grid-surface {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@keyframes lexiloom-confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -18px, 0) rotate(0deg) scale(0.75);
+  }
+  8% {
+    opacity: 1;
+    transform: translate3d(calc(var(--confetti-sway, 18px) * 0.4), 6%, 0)
+      rotate(calc(var(--confetti-rot, 540deg) * 0.12)) scale(1);
+  }
+  38% {
+    opacity: 1;
+    transform: translate3d(
+        calc(var(--confetti-drift, 40px) * 0.45 - var(--confetti-sway, 18px)),
+        var(--confetti-mid-y, 42vh),
+        0
+      )
+      rotate(calc(var(--confetti-rot, 540deg) * 0.48)) scale(1);
+  }
+  74% {
+    opacity: 0.95;
+    transform: translate3d(
+        calc(var(--confetti-drift, 40px) * 0.85 + var(--confetti-sway, 18px)),
+        var(--confetti-late-y, 82vh),
+        0
+      )
+      rotate(calc(var(--confetti-rot, 540deg) * 0.82)) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(
+        var(--confetti-drift, 40px),
+        var(--confetti-end-y, 108vh),
+        0
+      )
+      rotate(var(--confetti-rot, 540deg)) scale(0.85);
+  }
+}
+
+.lexiloom-confetti-piece {
+  animation-name: lexiloom-confetti-fall;
+  animation-timing-function: cubic-bezier(0.2, 0.58, 0.32, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes lexiloom-tile-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.13);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.lexiloom-tile-pop {
+  animation: lexiloom-tile-pop 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes lexiloom-shake {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  55% {
+    transform: translate3d(5px, 0, 0);
+  }
+  80% {
+    transform: translate3d(-2px, 0, 0);
+  }
+}
+
+.lexiloom-shake {
+  animation: lexiloom-shake 240ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes lexiloom-timer-tick {
+  0% {
+    opacity: 0.65;
+    transform: translate3d(0, -1.5px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.lexiloom-timer-tick {
+  animation: lexiloom-timer-tick 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes lexiloom-modal-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translate3d(0, 6px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.lexiloom-modal-in {
+  animation: lexiloom-modal-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lexiloom-confetti-piece {
+    display: none !important;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

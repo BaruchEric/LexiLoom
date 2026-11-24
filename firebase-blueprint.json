@@ -1,0 +1,331 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private player profile, cross-device progress, preferences, hint balance, and friend list.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "avatarType": {
+          "type": "string",
+          "enum": ["illustrated", "monogram"]
+        },
+        "avatarId": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "avatarInitials": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2
+        },
+        "avatarColor": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "friendCode": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 16,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "currentStreak": {
+          "type": "integer"
+        },
+        "bestStreak": {
+          "type": "integer"
+        },
+        "totalScore": {
+          "type": "integer"
+        },
+        "puzzlesSolved": {
+          "type": "integer"
+        },
+        "hintCredits": {
+          "type": "integer"
+        },
+        "adsWatched": {
+          "type": "integer"
+        },
+        "lastDailyDate": {
+          "type": "string",
+          "maxLength": 10
+        },
+        "lastDailyScore": {
+          "type": "integer"
+        },
+        "completedThemeIds": {
+          "type": "array"
+        },
+        "unlockedPackIds": {
+          "type": "array"
+        },
+        "friendUids": {
+          "type": "array"
+        },
+        "notificationsEnabled": {
+          "type": "boolean"
+        },
+        "reminderTime": {
+          "type": "string",
+          "maxLength": 5
+        },
+        "darkMode": {
+          "type": "boolean"
+        },
+        "largePrint": {
+          "type": "boolean"
+        },
+        "highContrast": {
+          "type": "boolean"
+        },
+        "soundEnabled": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "avatarType",
+        "avatarId",
+        "avatarInitials",
+        "avatarColor",
+        "friendCode",
+        "currentStreak",
+        "bestStreak",
+        "totalScore",
+        "puzzlesSolved",
+        "hintCredits",
+        "adsWatched",
+        "lastDailyDate",
+        "lastDailyScore",
+        "completedThemeIds",
+        "unlockedPackIds",
+        "friendUids",
+        "notificationsEnabled",
+        "reminderTime",
+        "darkMode",
+        "largePrint",
+        "highContrast",
+        "soundEnabled",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Publicly visible competitive ranking entry with zero PII for global and friends leaderboards.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "avatarType": {
+          "type": "string",
+          "enum": ["illustrated", "monogram"]
+        },
+        "avatarId": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "avatarInitials": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2
+        },
+        "avatarColor": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "friendCode": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 16,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "isPublic": {
+          "type": "boolean"
+        },
+        "currentStreak": {
+          "type": "integer"
+        },
+        "bestStreak": {
+          "type": "integer"
+        },
+        "totalScore": {
+          "type": "integer"
+        },
+        "puzzlesSolved": {
+          "type": "integer"
+        },
+        "lastDailyDate": {
+          "type": "string",
+          "maxLength": 10
+        },
+        "lastDailyScore": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "avatarType",
+        "avatarId",
+        "avatarInitials",
+        "avatarColor",
+        "friendCode",
+        "isPublic",
+        "currentStreak",
+        "bestStreak",
+        "totalScore",
+        "puzzlesSolved",
+        "lastDailyDate",
+        "lastDailyScore",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "FriendCodeRecord": {
+      "title": "FriendCodeRecord",
+      "description": "Exact-match Friend Code directory mapping code to a player UID without exposing user profiles.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 16,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["code", "uid", "displayName", "createdAt", "updatedAt"]
+    },
+    "PuzzleCompletion": {
+      "title": "PuzzleCompletion",
+      "description": "Immutable record of a completed daily challenge or theme puzzle owned by a user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "puzzleId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["daily", "theme"]
+        },
+        "themeName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "score": {
+          "type": "integer"
+        },
+        "durationSeconds": {
+          "type": "integer"
+        },
+        "hintsUsed": {
+          "type": "integer"
+        },
+        "wordsFound": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed"]
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "puzzleId",
+        "mode",
+        "themeName",
+        "score",
+        "durationSeconds",
+        "hintsUsed",
+        "wordsFound",
+        "status",
+        "completedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private owner-only user profile and cross-device synced game state."
+    },
+    "/users/{userId}/completions/{puzzleId}": {
+      "schema": { "$ref": "#/entities/PuzzleCompletion" },
+      "description": "Immutable completion history subcollection under each user."
+    },
+    "/leaderboard/{userId}": {
+      "schema": { "$ref": "#/entities/LeaderboardEntry" },
+      "description": "Public competitive leaderboard entries containing zero PII."
+    },
+    "/friendCodes/{code}": {
+      "schema": { "$ref": "#/entities/FriendCodeRecord" },
+      "description": "Exact-match friend code lookup records for connecting with friends."
+    }
+  }
+}

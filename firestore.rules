@@ -1,0 +1,300 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Deny all access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Primitive Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifiedOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidFriendCode(code) {
+      return code is string && code.size() >= 4 && code.size() <= 16 && code.matches('^[A-Z0-9\\-]+$');
+    }
+
+    function isValidStringArray(arr, maxLen) {
+      return arr is list
+        && arr.size() <= maxLen
+        && (arr.size() == 0 || (arr[0] is string && arr[0].size() >= 1 && arr[0].size() <= 128));
+    }
+
+    function isValidAvatarFields(data) {
+      return data.avatarType is string
+        && (data.avatarType == 'illustrated' || data.avatarType == 'monogram')
+        && data.avatarId is string
+        && data.avatarId.size() >= 1 && data.avatarId.size() <= 40
+        && data.avatarId.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.avatarInitials is string
+        && data.avatarInitials.size() >= 1 && data.avatarInitials.size() <= 2
+        && data.avatarColor is string
+        && data.avatarColor.size() >= 1 && data.avatarColor.size() <= 20;
+    }
+
+    // --- Entity Validation Blueprints ---
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor',
+          'friendCode', 'currentStreak', 'bestStreak', 'totalScore', 'puzzlesSolved',
+          'hintCredits', 'adsWatched', 'lastDailyDate', 'lastDailyScore',
+          'completedThemeIds', 'unlockedPackIds', 'friendUids',
+          'notificationsEnabled', 'reminderTime', 'darkMode', 'largePrint',
+          'highContrast', 'soundEnabled', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor',
+          'friendCode', 'currentStreak', 'bestStreak', 'totalScore', 'puzzlesSolved',
+          'hintCredits', 'adsWatched', 'lastDailyDate', 'lastDailyScore',
+          'completedThemeIds', 'unlockedPackIds', 'friendUids',
+          'notificationsEnabled', 'reminderTime', 'darkMode', 'largePrint',
+          'highContrast', 'soundEnabled', 'createdAt', 'updatedAt'
+        ])
+        && data.uid == request.auth.uid
+        && data.uid == userId
+        && isValidId(data.uid)
+        && data.displayName is string
+        && data.displayName.size() >= 1 && data.displayName.size() <= 40
+        && isValidAvatarFields(data)
+        && isValidFriendCode(data.friendCode)
+        && data.currentStreak is int && data.currentStreak >= 0 && data.currentStreak <= 10000
+        && data.bestStreak is int && data.bestStreak >= 0 && data.bestStreak <= 10000
+        && data.totalScore is int && data.totalScore >= 0 && data.totalScore <= 10000000
+        && data.puzzlesSolved is int && data.puzzlesSolved >= 0 && data.puzzlesSolved <= 100000
+        && data.hintCredits is int && data.hintCredits >= 0 && data.hintCredits <= 500
+        && data.adsWatched is int && data.adsWatched >= 0 && data.adsWatched <= 100000
+        && data.lastDailyDate is string && data.lastDailyDate.size() <= 10
+        && data.lastDailyScore is int && data.lastDailyScore >= 0 && data.lastDailyScore <= 50000
+        && isValidStringArray(data.completedThemeIds, 50)
+        && isValidStringArray(data.unlockedPackIds, 50)
+        && isValidStringArray(data.friendUids, 50)
+        && data.notificationsEnabled is bool
+        && data.reminderTime is string && data.reminderTime.size() >= 4 && data.reminderTime.size() <= 5
+        && data.darkMode is bool
+        && data.largePrint is bool
+        && data.highContrast is bool
+        && data.soundEnabled is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLeaderboardEntry(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor',
+          'friendCode', 'isPublic', 'currentStreak', 'bestStreak', 'totalScore',
+          'puzzlesSolved', 'lastDailyDate', 'lastDailyScore', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor',
+          'friendCode', 'isPublic', 'currentStreak', 'bestStreak', 'totalScore',
+          'puzzlesSolved', 'lastDailyDate', 'lastDailyScore', 'createdAt', 'updatedAt'
+        ])
+        && data.uid == request.auth.uid
+        && data.uid == userId
+        && isValidId(data.uid)
+        && data.displayName is string
+        && data.displayName.size() >= 1 && data.displayName.size() <= 40
+        && isValidAvatarFields(data)
+        && isValidFriendCode(data.friendCode)
+        && data.isPublic is bool && data.isPublic == true
+        && data.currentStreak is int && data.currentStreak >= 0 && data.currentStreak <= 10000
+        && data.bestStreak is int && data.bestStreak >= 0 && data.bestStreak <= 10000
+        && data.totalScore is int && data.totalScore >= 0 && data.totalScore <= 10000000
+        && data.puzzlesSolved is int && data.puzzlesSolved >= 0 && data.puzzlesSolved <= 100000
+        && data.lastDailyDate is string && data.lastDailyDate.size() <= 10
+        && data.lastDailyScore is int && data.lastDailyScore >= 0 && data.lastDailyScore <= 50000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidFriendCodeRecord(data, code) {
+      return data.keys().hasAll(['code', 'uid', 'displayName', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['code', 'uid', 'displayName', 'createdAt', 'updatedAt'])
+        && data.code == code
+        && isValidFriendCode(data.code)
+        && data.uid == request.auth.uid
+        && isValidId(data.uid)
+        && data.displayName is string
+        && data.displayName.size() >= 1 && data.displayName.size() <= 40
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidPuzzleCompletion(data, userId, puzzleId) {
+      return data.keys().hasAll([
+          'uid', 'puzzleId', 'mode', 'themeName', 'score',
+          'durationSeconds', 'hintsUsed', 'wordsFound', 'status', 'completedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'puzzleId', 'mode', 'themeName', 'score',
+          'durationSeconds', 'hintsUsed', 'wordsFound', 'status', 'completedAt'
+        ])
+        && data.uid == request.auth.uid
+        && data.uid == userId
+        && isValidId(data.uid)
+        && data.puzzleId == puzzleId
+        && isValidId(data.puzzleId)
+        && data.puzzleId.size() <= 64
+        && data.mode is string && (data.mode == 'daily' || data.mode == 'theme')
+        && data.themeName is string && data.themeName.size() >= 1 && data.themeName.size() <= 60
+        && data.score is int && data.score >= 0 && data.score <= 50000
+        && data.durationSeconds is int && data.durationSeconds >= 0 && data.durationSeconds <= 86400
+        && data.hintsUsed is int && data.hintsUsed >= 0 && data.hintsUsed <= 50
+        && data.wordsFound is int && data.wordsFound >= 0 && data.wordsFound <= 50
+        && data.status is string && data.status == 'completed'
+        && data.completedAt is timestamp;
+    }
+
+    // --- Collection Rules ---
+
+    // 1. Private User Profile & Synced State (Owner-only, no list)
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+      allow create: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().friendCode == existing().friendCode
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: Update Profile & Avatar
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor', 'updatedAt'
+          ]) ||
+          // Action: Sync Progress, Streaks & Hints
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'currentStreak', 'bestStreak', 'totalScore', 'puzzlesSolved',
+            'hintCredits', 'adsWatched', 'lastDailyDate', 'lastDailyScore',
+            'completedThemeIds', 'unlockedPackIds', 'updatedAt'
+          ]) ||
+          // Action: Manage Friends
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'friendUids', 'updatedAt'
+          ]) ||
+          // Action: Update Accessibility & Notification Settings
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'notificationsEnabled', 'reminderTime', 'darkMode', 'largePrint',
+            'highContrast', 'soundEnabled', 'updatedAt'
+          ]) ||
+          // Action: Full Offline Queue Merge
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor',
+            'currentStreak', 'bestStreak', 'totalScore', 'puzzlesSolved',
+            'hintCredits', 'adsWatched', 'lastDailyDate', 'lastDailyScore',
+            'completedThemeIds', 'unlockedPackIds', 'friendUids',
+            'notificationsEnabled', 'reminderTime', 'darkMode', 'largePrint',
+            'highContrast', 'soundEnabled', 'updatedAt'
+          ])
+        );
+      allow delete: if false;
+
+      // Subcollection: Immutable Puzzle Completions (Master Gate + Atomicity + Terminal State Lock)
+      match /completions/{puzzleId} {
+        allow get: if isOwner(userId)
+          && isValidId(userId)
+          && isValidId(puzzleId)
+          && exists(/databases/$(database)/documents/users/$(userId));
+        allow list: if isOwner(userId) && resource.data.uid == request.auth.uid;
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(puzzleId)
+          && isValidPuzzleCompletion(incoming(), userId, puzzleId)
+          && incoming().completedAt == request.time
+          && existsAfter(/databases/$(database)/documents/users/$(userId));
+        // Terminal State Locking: completed records cannot be altered
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    // 2. Public Zero-PII Leaderboard
+    match /leaderboard/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && resource.data.isPublic == true;
+      allow list: if isSignedIn() && resource.data.isPublic == true;
+      allow create: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidLeaderboardEntry(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidLeaderboardEntry(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().friendCode == existing().friendCode
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: Update Avatar & Display Name
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor', 'updatedAt'
+          ]) ||
+          // Action: Update Competitive Stats
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'currentStreak', 'bestStreak', 'totalScore', 'puzzlesSolved',
+            'lastDailyDate', 'lastDailyScore', 'updatedAt'
+          ]) ||
+          // Action: Full Sync Update
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName', 'avatarType', 'avatarId', 'avatarInitials', 'avatarColor',
+            'currentStreak', 'bestStreak', 'totalScore', 'puzzlesSolved',
+            'lastDailyDate', 'lastDailyScore', 'updatedAt'
+          ])
+        );
+      allow delete: if false;
+    }
+
+    // 3. Exact-Match Friend Codes Directory (No list allowed)
+    match /friendCodes/{code} {
+      allow get: if isSignedIn() && isValidFriendCode(code);
+      allow list: if false;
+      allow create: if isVerified()
+        && isValidFriendCode(code)
+        && isValidFriendCodeRecord(incoming(), code)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerified()
+        && isValidFriendCode(code)
+        && isValidFriendCodeRecord(incoming(), code)
+        && existing().uid == request.auth.uid
+        && incoming().uid == existing().uid
+        && incoming().code == existing().code
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt']);
+      allow delete: if false;
+    }
+  }
+}
